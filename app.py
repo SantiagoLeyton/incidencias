@@ -1,10 +1,29 @@
 from __future__ import annotations
 import os, tempfile, uuid
+from decimal import Decimal, InvalidOperation
 from flask import Flask, render_template, request, redirect, url_for, abort
 from analyzer import analyze, LABELS
 
 app=Flask(__name__); app.config["MAX_CONTENT_LENGTH"]=50*1024*1024
 RESULTS={}
+@app.template_filter("money_co")
+def money_co(value):
+    """Solo presentación colombiana; no altera los datos del análisis."""
+    if value in (None, "", "FALTA"):
+        return value
+    try:
+        text = str(value).strip()
+        if "," in text:
+            normalized = text.replace(".", "").replace(",", ".")
+        elif text.count(".") == 1 and len(text.rsplit(".", 1)[1]) in (1, 2):
+            normalized = text
+        else:
+            normalized = text.replace(".", "")
+        amount = Decimal(normalized)
+    except InvalidOperation:
+        return value
+    rendered = f"{amount:,.2f}" if amount != amount.to_integral_value() else f"{amount:,.0f}"
+    return rendered.replace(",", "_").replace(".", ",").replace("_", ".")
 @app.get("/")
 def index(): return render_template("index.html")
 @app.post("/analyze")
