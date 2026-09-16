@@ -1,0 +1,7 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Analizador de libros históricos</title>
+<body><h1>ANALIZADOR DE LIBROS HISTÓRICOS</h1>
+{% if error %}<p role="alert">⚠ {{ error }}</p>{% endif %}
+<form action="/analyze" method="post" enctype="multipart/form-data">
+  <label>Archivo: <input type="file" name="file" accept=".xlsx" required></label>
+  <button type="submit">Analizar</button>
+</form><p>El libro se lee solamente; no se modifica ni se guarda.</p></body></html>

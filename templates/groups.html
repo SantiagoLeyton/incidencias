@@ -1,0 +1,7 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Incidencias</title><body>
+<h1>INCIDENCIAS ENCONTRADAS</h1>
+<p>Hojas analizadas: {{ result.stats.sheets }} ({{ result.stats.compatible_sheets|join(', ') }}). Filas con datos de pago analizadas: {{ result.stats.rows }}.</p>
+{% if not groups %}<h2>ANALISIS COMPLETADO</h2><p>No se encontraron incidencias.</p>{% else %}
+<table border="1" cellpadding="6"><tr><th>INCIDENCIA</th><th>DESCRIPCIÓN</th><th>INCIDENCIAS</th><th>FILAS AFECTADAS</th><th>ACCIÓN</th></tr>
+{% for group in groups %}<tr><td>{{ group.label }}</td><td>Regla blocking replicada de Gestión Fiduciaria.</td><td>{{ group.evidence_count }}</td><td>{{ group.count }}</td><td><a href="{{ url_for('incident_list', token=token, kind=group.kind) }}">VER DETALLES</a></td></tr>{% endfor %}</table>{% endif %}
+<p><a href="/">Analizar otro libro</a></p></body></html>
