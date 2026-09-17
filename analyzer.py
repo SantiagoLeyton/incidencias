@@ -104,7 +104,9 @@ def gf_positive_values(value):
             try: return [sum(Decimal(x.replace(",", ".")) for x in parts)]
             except InvalidOperation: return []
         parts=expression.split("+")
-        if len(parts)<2 or any(not x for x in parts): return []
+        # Excel también puede guardar un único valor como fórmula, por ejemplo
+        # =1050000. Eso sigue representando UN valor de pago válido.
+        if any(not x for x in parts): return []
     else: parts=[text]
     values=[]
     for part in parts:
