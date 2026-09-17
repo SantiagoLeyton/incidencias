@@ -171,14 +171,20 @@ def gf_blocking(sheet, row, context, active, values, evidence):
         if len(recs)==len(dates): pairs[destination]=list(zip(recs,dates))
     received=gf_positive_values(value("received"))
     c_pairs=pairs.get("constructora",[])
-    if c_pairs or received:
+    # Un valor aislado en RECIBIDO no demuestra por sí solo que exista un pago
+    # de Constructora. Solo validamos cantidades cuando la fila realmente trae
+    # recibo o fecha de Constructora.
+    if standard or c_dates:
         if len(received)!=len(c_pairs):
             result.append(make_incident("HIST_PAYMENT_VALUE_COUNT_MISMATCH",sheet,row,context,
                 "La cantidad de valores no permite reconstruir pagos históricos individuales.",
                 [f"DESTINO: CONSTRUCTORA",f"VALORES: {len(received)}",f"RECIBOS CON FECHA: {len(c_pairs)}"],evidence))
-    # GF evalúa Fiducia solo cuando sus recibos y fechas coinciden.
+
+    # Fiducia se valida únicamente si la fila realmente declara un recibo o
+    # una fecha fiduciaria. Columnas mensuales vacías o valores residuales no
+    # deben fabricar una incidencia de un pago inexistente.
     f_pairs=pairs.get("fiduciaria",[])
-    if len(fiduciary)==len(f_dates):
+    if (fiduciary or f_dates) and len(fiduciary)==len(f_dates):
         f_values=[]
         for col, header in active.get("fid_value",[]):
             for amount in gf_positive_values(cell_text(values[col-1]) if col<=len(values) else ""):
@@ -208,7 +214,7 @@ def make_incident(kind, sheet, row, context, description, info, evidence):
             "context":context, "description":description, "info":info, "evidence":evidence}
 
 def rows_for(source):
-    max_len=max(len(source["dates"]),len(source["receipts"]),len(source["values"]),1)
+    max_len=max(len(source["dates"]),len(source["receipts"]),len(source["values"]))
     result=[]
     for n in range(max_len):
         d=source["dates"][n] if n<len(source["dates"]) else None
